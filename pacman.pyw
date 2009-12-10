@@ -254,6 +254,7 @@ class game ():
         return self.screenPixelPos
         
     def GetLevelNum (self):
+		# dream, TODO set this to const val; maybe 1
         return self.levelNum
     
     def SetNextLevel (self):
@@ -1354,6 +1355,24 @@ def CheckInputs():
             thisGame.StartNewGame()
             
 
+def ConsultPacmanBrain():
+	if thisGame.mode == 1:
+		test = random.randint(0,10)
+		if test == 1:
+			dir = random.randint(0,3)
+			if dir == 0:
+				player.velX = player.speed
+				player.velY = 0
+			elif dir == 1:
+				player.velX = -player.speed
+				player.velY = 0
+			elif dir == 2:
+				player.velX = 0
+				player.velY = player.speed
+			elif dir == 3:
+				player.velX = 0
+				player.velY = -player.speed
+
     
 #      _____________________________________________
 # ___/  function: Get ID-Tilename Cross References  \______________________________________ 
@@ -1430,9 +1449,9 @@ path = path_finder()
 # create ghost objects
 ghosts = {}
 for i in range(0, 6, 1):
-    # remember, ghost[4] is the blue, vulnerable ghost
-    ghosts[i] = ghost(i)
-    
+	# remember, ghost[4] is the blue, vulnerable ghost
+	ghosts[i] = ghost(i)
+	
 # create piece of fruit
 thisFruit = fruit()
 
@@ -1445,128 +1464,282 @@ thisGame = game()
 thisLevel = level()
 thisLevel.LoadLevel( thisGame.GetLevelNum() )
 
-print thisGame.screenSize
-window = pygame.display.set_mode( thisGame.screenSize, pygame.DOUBLEBUF | pygame.HWSURFACE )
+def main():
+	# running main() atm doesn't work - all of code in here was in global space
+	# it is only placeholder for old code atm
 
-# initialise the joystick
-if pygame.joystick.get_count()>0:
-  if JS_DEVNUM<pygame.joystick.get_count(): js=pygame.joystick.Joystick(JS_DEVNUM)
-  else: js=pygame.joystick.Joystick(0)
-  js.init()
-else: js=None
+	print thisGame.screenSize
+	window = pygame.display.set_mode( thisGame.screenSize, pygame.DOUBLEBUF | pygame.HWSURFACE )
 
-while True: 
+	# initialise the joystick
+	if pygame.joystick.get_count()>0:
+	  if JS_DEVNUM<pygame.joystick.get_count(): js=pygame.joystick.Joystick(JS_DEVNUM)
+	  else: js=pygame.joystick.Joystick(0)
+	  js.init()
+	else: js=None
 
-    CheckIfCloseButton( pygame.event.get() )
-    
-    if thisGame.mode == 1:
-        # normal gameplay mode
-        CheckInputs()
-        
-        thisGame.modeTimer += 1
-        player.Move()
-        for i in range(0, 4, 1):
-            ghosts[i].Move()
-        thisFruit.Move()
-            
-    elif thisGame.mode == 2:
-        # waiting after getting hit by a ghost
-        thisGame.modeTimer += 1
-        
-        if thisGame.modeTimer == 90:
-            thisLevel.Restart()
-            
-            thisGame.lives -= 1
-            if thisGame.lives == -1:
-                thisGame.updatehiscores(thisGame.score)
-                thisGame.SetMode( 3 )
-                thisGame.drawmidgamehiscores()
-            else:
-                thisGame.SetMode( 4 )
-                
-    elif thisGame.mode == 3:
-        # game over
-        CheckInputs()
-            
-    elif thisGame.mode == 4:
-        # waiting to start
-        thisGame.modeTimer += 1
-        
-        if thisGame.modeTimer == 90:
-            thisGame.SetMode( 1 )
-            player.velX = player.speed
-            
-    elif thisGame.mode == 5:
-        # brief pause after munching a vulnerable ghost
-        thisGame.modeTimer += 1
-        
-        if thisGame.modeTimer == 30:
-            thisGame.SetMode( 1 )
-            
-    elif thisGame.mode == 6:
-        # pause after eating all the pellets
-        thisGame.modeTimer += 1
-        
-        if thisGame.modeTimer == 60:
-            thisGame.SetMode( 7 )
-            oldEdgeLightColor = thisLevel.edgeLightColor
-            oldEdgeShadowColor = thisLevel.edgeShadowColor
-            oldFillColor = thisLevel.fillColor
-            
-    elif thisGame.mode == 7:
-        # flashing maze after finishing level
-        thisGame.modeTimer += 1
-        
-        whiteSet = [10, 30, 50, 70]
-        normalSet = [20, 40, 60, 80]
-        
-        if not whiteSet.count(thisGame.modeTimer) == 0:
-            # member of white set
-            thisLevel.edgeLightColor = (255, 255, 255, 255)
-            thisLevel.edgeShadowColor = (255, 255, 255, 255)
-            thisLevel.fillColor = (0, 0, 0, 255)
-            GetCrossRef()
-        elif not normalSet.count(thisGame.modeTimer) == 0:
-            # member of normal set
-            thisLevel.edgeLightColor = oldEdgeLightColor
-            thisLevel.edgeShadowColor = oldEdgeShadowColor
-            thisLevel.fillColor = oldFillColor
-            GetCrossRef()
-        elif thisGame.modeTimer == 150:
-            thisGame.SetMode ( 8 )
-            
-    elif thisGame.mode == 8:
-        # blank screen before changing levels
-        thisGame.modeTimer += 1
-        if thisGame.modeTimer == 10:
-            thisGame.SetNextLevel()
+	while True: 
 
-    thisGame.SmartMoveScreen()
-    
-    screen.blit(img_Background, (0, 0))
-    
-    if not thisGame.mode == 8:
-        thisLevel.DrawMap()
-        
-        if thisGame.fruitScoreTimer > 0:
-            if thisGame.modeTimer % 2 == 0:
-                thisGame.DrawNumber (2500, (thisFruit.x - thisGame.screenPixelPos[0] - 16, thisFruit.y - thisGame.screenPixelPos[1] + 4))
+		CheckIfCloseButton( pygame.event.get() )
+		
+		if thisGame.mode == 1:
+			# normal gameplay mode
+			CheckInputs()
+			
+			thisGame.modeTimer += 1
+			player.Move()
+			for i in range(0, 4, 1):
+				ghosts[i].Move()
+			thisFruit.Move()
+				
+		elif thisGame.mode == 2:
+			# waiting after getting hit by a ghost
+			thisGame.modeTimer += 1
+			
+			if thisGame.modeTimer == 90:
+				thisLevel.Restart()
+				
+				thisGame.lives -= 1
+				if thisGame.lives == -1:
+					thisGame.updatehiscores(thisGame.score)
+					thisGame.SetMode( 3 )
+					thisGame.drawmidgamehiscores()
+				else:
+					thisGame.SetMode( 4 )
+					
+		elif thisGame.mode == 3:
+			# game over
+			CheckInputs()
+				
+		elif thisGame.mode == 4:
+			# waiting to start
+			thisGame.modeTimer += 1
+			
+			if thisGame.modeTimer == 90:
+				thisGame.SetMode( 1 )
+				player.velX = player.speed
+				
+		elif thisGame.mode == 5:
+			# brief pause after munching a vulnerable ghost
+			thisGame.modeTimer += 1
+			
+			if thisGame.modeTimer == 30:
+				thisGame.SetMode( 1 )
+				
+		elif thisGame.mode == 6:
+			# pause after eating all the pellets
+			thisGame.modeTimer += 1
+			
+			if thisGame.modeTimer == 60:
+				thisGame.SetMode( 7 )
+				oldEdgeLightColor = thisLevel.edgeLightColor
+				oldEdgeShadowColor = thisLevel.edgeShadowColor
+				oldFillColor = thisLevel.fillColor
+				
+		elif thisGame.mode == 7:
+			# flashing maze after finishing level
+			thisGame.modeTimer += 1
+			
+			whiteSet = [10, 30, 50, 70]
+			normalSet = [20, 40, 60, 80]
+			
+			if not whiteSet.count(thisGame.modeTimer) == 0:
+				# member of white set
+				thisLevel.edgeLightColor = (255, 255, 255, 255)
+				thisLevel.edgeShadowColor = (255, 255, 255, 255)
+				thisLevel.fillColor = (0, 0, 0, 255)
+				GetCrossRef()
+			elif not normalSet.count(thisGame.modeTimer) == 0:
+				# member of normal set
+				thisLevel.edgeLightColor = oldEdgeLightColor
+				thisLevel.edgeShadowColor = oldEdgeShadowColor
+				thisLevel.fillColor = oldFillColor
+				GetCrossRef()
+			elif thisGame.modeTimer == 150:
+				thisGame.SetMode ( 8 )
+				
+		elif thisGame.mode == 8:
+			# blank screen before changing levels
+			thisGame.modeTimer += 1
+			if thisGame.modeTimer == 10:
+				thisGame.SetNextLevel()
 
-        for i in range(0, 4, 1):
-            ghosts[i].Draw()
-        thisFruit.Draw()
-        player.Draw()
-        
-        if thisGame.mode == 3:
-                screen.blit(thisGame.imHiscores,(32,256))
-        
-    if thisGame.mode == 5:
-        thisGame.DrawNumber (thisGame.ghostValue / 2, (player.x - thisGame.screenPixelPos[0] - 4, player.y - thisGame.screenPixelPos[1] + 6))
-    
-    
-    
-    thisGame.DrawScore()
-    
-    pygame.display.flip()
-    
-    clock.tick (60)
+
+		thisGame.SmartMoveScreen()
+		
+		screen.blit(img_Background, (0, 0))
+		
+		if not thisGame.mode == 8:
+			thisLevel.DrawMap()
+			
+			if thisGame.fruitScoreTimer > 0:
+				if thisGame.modeTimer % 2 == 0:
+					thisGame.DrawNumber (2500, (thisFruit.x - thisGame.screenPixelPos[0] - 16, thisFruit.y - thisGame.screenPixelPos[1] + 4))
+
+			for i in range(0, 4, 1):
+				ghosts[i].Draw()
+			thisFruit.Draw()
+			player.Draw()
+			
+			if thisGame.mode == 3:
+					screen.blit(thisGame.imHiscores,(32,256))
+			
+		if thisGame.mode == 5:
+			thisGame.DrawNumber (thisGame.ghostValue / 2, (player.x - thisGame.screenPixelPos[0] - 4, player.y - thisGame.screenPixelPos[1] + 6))
+		
+		thisGame.DrawScore()
+		
+		pygame.display.flip()
+		
+		clock.tick (60)
+
+
+def evo_main(draw_graphics=False):
+
+	last_tick = pygame.time.get_ticks()
+
+	if(draw_graphics):
+		window = pygame.display.set_mode( thisGame.screenSize, pygame.DOUBLEBUF | pygame.HWSURFACE )
+
+	thisGame.StartNewGame()
+	js=None
+
+	# for us, game states go like this:
+	# 4 (start game) -> 1* (animate) -> 2 (got by the ghost)
+	while True: 
+
+		# dream, FIXME debug test
+		print "[%d] game mode: %d" % (pygame.time.get_ticks()-last_tick,thisGame.mode)
+		last_tick = pygame.time.get_ticks()
+		
+		CheckIfCloseButton( pygame.event.get() )
+		
+		if thisGame.mode == 1:
+			# normal gameplay mode
+
+			# CheckiInputs normally modifies velocity of player in game object
+			# look there to see how to steer pacman
+			# CheckInputs()
+			ConsultPacmanBrain()
+			
+			thisGame.modeTimer += 1
+			player.Move()
+			for i in range(0, 4, 1):
+				ghosts[i].Move()
+			thisFruit.Move()
+				
+		elif thisGame.mode == 2:
+			# waiting after getting hit by a ghost
+			print "you got hit, so GTFO"
+			return
+			"""
+			thisGame.modeTimer += 1
+			if thisGame.modeTimer == 90:
+				thisLevel.Restart()
+				
+				thisGame.lives -= 1
+				if thisGame.lives == -1:
+					thisGame.updatehiscores(thisGame.score)
+					thisGame.SetMode( 3 )
+					thisGame.drawmidgamehiscores()
+				else:
+					thisGame.SetMode( 4 )
+			"""
+					
+		elif thisGame.mode == 3:
+			# game over
+			# also, this is default state...
+			thisGame.SetMode( 1 )
+			# we do not want to wait; rather restart game to
+			# try again
+			#
+			# CheckInputs()
+				
+		elif thisGame.mode == 4:
+			# waiting to start
+			print 'waiting to start'
+			thisGame.SetMode( 1 )
+				
+		elif thisGame.mode == 5:
+			# earlier: brief pause after munching a vulnerable ghost
+			thisGame.SetMode( 1 )
+				
+		elif thisGame.mode == 6:
+			# earlier: pause after eating all the pellets
+			print "good for ya, now GTFO"
+			return
+			# thisGame.modeTimer += 1
+			# if thisGame.modeTimer == 60:
+			#	thisGame.SetMode( 7 )
+			#	oldEdgeLightColor = thisLevel.edgeLightColor
+			#	oldEdgeShadowColor = thisLevel.edgeShadowColor
+			#	oldFillColor = thisLevel.fillColor
+				
+		elif thisGame.mode == 7:
+			# flashing maze after finishing level
+
+			# now it's probably unreachable code, but just in case
+			thisGame.SetMode ( 6 ) # exit
+			"""
+			thisGame.modeTimer += 1
+			
+			whiteSet = [10, 30, 50, 70]
+			normalSet = [20, 40, 60, 80]
+			
+			if not whiteSet.count(thisGame.modeTimer) == 0:
+				# member of white set
+				thisLevel.edgeLightColor = (255, 255, 255, 255)
+				thisLevel.edgeShadowColor = (255, 255, 255, 255)
+				thisLevel.fillColor = (0, 0, 0, 255)
+				GetCrossRef()
+			elif not normalSet.count(thisGame.modeTimer) == 0:
+				# member of normal set
+				thisLevel.edgeLightColor = oldEdgeLightColor
+				thisLevel.edgeShadowColor = oldEdgeShadowColor
+				thisLevel.fillColor = oldFillColor
+				GetCrossRef()
+			elif thisGame.modeTimer == 150:
+				thisGame.SetMode ( 8 )
+			"""
+				
+		elif thisGame.mode == 8:
+			# blank screen before changing levels
+			# now it's probably unreachable code, but just in case
+			thisGame.SetMode ( 6 ) # exit
+			# thisGame.modeTimer += 1
+			# if thisGame.modeTimer == 10:
+			#	thisGame.SetNextLevel()
+
+		thisGame.SmartMoveScreen()
+		
+		screen.blit(img_Background, (0, 0))
+		
+		if not thisGame.mode == 8:
+			thisLevel.DrawMap()
+			
+			if thisGame.fruitScoreTimer > 0:
+				if thisGame.modeTimer % 2 == 0:
+					thisGame.DrawNumber (2500, (thisFruit.x - thisGame.screenPixelPos[0] - 16, thisFruit.y - thisGame.screenPixelPos[1] + 4))
+
+			for i in range(0, 4, 1):
+				ghosts[i].Draw()
+			thisFruit.Draw()
+			player.Draw()
+			
+			if thisGame.mode == 3:
+					screen.blit(thisGame.imHiscores,(32,256))
+			
+		if thisGame.mode == 5:
+			thisGame.DrawNumber (thisGame.ghostValue / 2, (player.x - thisGame.screenPixelPos[0] - 4, player.y - thisGame.screenPixelPos[1] + 6))
+		
+		
+		
+		thisGame.DrawScore()
+		
+		#if 
+		pygame.display.flip()
+		
+		clock.tick (999) # max fps
+
+evo_main(True)
+evo_main(True)
