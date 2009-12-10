@@ -44,14 +44,28 @@ img_Background = pygame.image.load(os.path.join(SCRIPT_PATH,"res","backgrounds",
 
 pygame.mixer.init()
 
+
+sound_on = True
+class sound_player ():
+	def __init__(self, sound):
+		self.sound = sound
+	
+	def play(self):
+		if sound_on:
+			self.sound.play()
+		else:
+			print 'play something'
+		
+
 snd_pellet = {}
-snd_pellet[0] = pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","pellet1.wav"))
-snd_pellet[1] = pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","pellet2.wav"))
-snd_powerpellet = pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","powerpellet.wav"))
-snd_eatgh = pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","eatgh2.wav"))
-snd_fruitbounce = pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","fruitbounce.wav"))
-snd_eatfruit = pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","eatfruit.wav"))
-snd_extralife = pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","extralife.wav"))
+snd_pellet[0] = sound_player(pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","pellet1.wav")))
+snd_pellet[1] = sound_player(pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","pellet2.wav")))
+snd_powerpellet = sound_player(pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","powerpellet.wav")))
+snd_eatgh = sound_player(pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","eatgh2.wav")))
+snd_fruitbounce = sound_player(pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","fruitbounce.wav")))
+snd_eatfruit = sound_player(pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","eatfruit.wav")))
+snd_extralife = sound_player(pygame.mixer.Sound(os.path.join(SCRIPT_PATH,"res","sounds","extralife.wav")))
+	
 
 ghostcolor = {}
 ghostcolor[0] = (255, 0, 0, 255)
@@ -1353,9 +1367,12 @@ def CheckInputs():
     elif thisGame.mode == 3:
         if pygame.key.get_pressed()[ pygame.K_RETURN ] or (js!=None and js.get_button(JS_STARTBUTTON)):
             thisGame.StartNewGame()
-            
+
 
 def ConsultPacmanBrain():
+	#
+	# remember to use thisLevel.CheckIfHitWall; look few lines up
+	#
 	if thisGame.mode == 1:
 		test = random.randint(0,10)
 		if test == 1:
@@ -1595,7 +1612,7 @@ def main():
 
 
 def evo_main(draw_graphics=False):
-
+	sound_on = draw_graphics
 	last_tick = pygame.time.get_ticks()
 
 	if(draw_graphics):
@@ -1609,7 +1626,7 @@ def evo_main(draw_graphics=False):
 	while True: 
 
 		# dream, FIXME debug test
-		print "[%d] game mode: %d" % (pygame.time.get_ticks()-last_tick,thisGame.mode)
+		# print "[%d] game mode: %d" % (pygame.time.get_ticks()-last_tick,thisGame.mode)
 		last_tick = pygame.time.get_ticks()
 		
 		CheckIfCloseButton( pygame.event.get() )
@@ -1632,19 +1649,6 @@ def evo_main(draw_graphics=False):
 			# waiting after getting hit by a ghost
 			print "you got hit, so GTFO"
 			return
-			"""
-			thisGame.modeTimer += 1
-			if thisGame.modeTimer == 90:
-				thisLevel.Restart()
-				
-				thisGame.lives -= 1
-				if thisGame.lives == -1:
-					thisGame.updatehiscores(thisGame.score)
-					thisGame.SetMode( 3 )
-					thisGame.drawmidgamehiscores()
-				else:
-					thisGame.SetMode( 4 )
-			"""
 					
 		elif thisGame.mode == 3:
 			# game over
@@ -1668,78 +1672,45 @@ def evo_main(draw_graphics=False):
 			# earlier: pause after eating all the pellets
 			print "good for ya, now GTFO"
 			return
-			# thisGame.modeTimer += 1
-			# if thisGame.modeTimer == 60:
-			#	thisGame.SetMode( 7 )
-			#	oldEdgeLightColor = thisLevel.edgeLightColor
-			#	oldEdgeShadowColor = thisLevel.edgeShadowColor
-			#	oldFillColor = thisLevel.fillColor
 				
 		elif thisGame.mode == 7:
 			# flashing maze after finishing level
 
 			# now it's probably unreachable code, but just in case
 			thisGame.SetMode ( 6 ) # exit
-			"""
-			thisGame.modeTimer += 1
-			
-			whiteSet = [10, 30, 50, 70]
-			normalSet = [20, 40, 60, 80]
-			
-			if not whiteSet.count(thisGame.modeTimer) == 0:
-				# member of white set
-				thisLevel.edgeLightColor = (255, 255, 255, 255)
-				thisLevel.edgeShadowColor = (255, 255, 255, 255)
-				thisLevel.fillColor = (0, 0, 0, 255)
-				GetCrossRef()
-			elif not normalSet.count(thisGame.modeTimer) == 0:
-				# member of normal set
-				thisLevel.edgeLightColor = oldEdgeLightColor
-				thisLevel.edgeShadowColor = oldEdgeShadowColor
-				thisLevel.fillColor = oldFillColor
-				GetCrossRef()
-			elif thisGame.modeTimer == 150:
-				thisGame.SetMode ( 8 )
-			"""
 				
 		elif thisGame.mode == 8:
 			# blank screen before changing levels
 			# now it's probably unreachable code, but just in case
 			thisGame.SetMode ( 6 ) # exit
-			# thisGame.modeTimer += 1
-			# if thisGame.modeTimer == 10:
-			#	thisGame.SetNextLevel()
 
-		thisGame.SmartMoveScreen()
+		if draw_graphics:
+			thisGame.SmartMoveScreen()
+			screen.blit(img_Background, (0, 0))
 		
-		screen.blit(img_Background, (0, 0))
-		
-		if not thisGame.mode == 8:
-			thisLevel.DrawMap()
-			
-			if thisGame.fruitScoreTimer > 0:
-				if thisGame.modeTimer % 2 == 0:
-					thisGame.DrawNumber (2500, (thisFruit.x - thisGame.screenPixelPos[0] - 16, thisFruit.y - thisGame.screenPixelPos[1] + 4))
+			if not thisGame.mode == 8:
+				thisLevel.DrawMap()
+				
+				if thisGame.fruitScoreTimer > 0:
+					if thisGame.modeTimer % 2 == 0:
+						thisGame.DrawNumber (2500, (thisFruit.x - thisGame.screenPixelPos[0] - 16, thisFruit.y - thisGame.screenPixelPos[1] + 4))
 
-			for i in range(0, 4, 1):
-				ghosts[i].Draw()
-			thisFruit.Draw()
-			player.Draw()
+				for i in range(0, 4, 1):
+					ghosts[i].Draw()
+				thisFruit.Draw()
+				player.Draw()
+				
+				if thisGame.mode == 3:
+						screen.blit(thisGame.imHiscores,(32,256))
+				
+			if thisGame.mode == 5:
+				thisGame.DrawNumber (thisGame.ghostValue / 2, (player.x - thisGame.screenPixelPos[0] - 4, player.y - thisGame.screenPixelPos[1] + 6))
 			
-			if thisGame.mode == 3:
-					screen.blit(thisGame.imHiscores,(32,256))
-			
-		if thisGame.mode == 5:
-			thisGame.DrawNumber (thisGame.ghostValue / 2, (player.x - thisGame.screenPixelPos[0] - 4, player.y - thisGame.screenPixelPos[1] + 6))
+			thisGame.DrawScore()
 		
-		
-		
-		thisGame.DrawScore()
-		
-		#if 
-		pygame.display.flip()
-		
-		clock.tick (999) # max fps
+			pygame.display.flip()
+			clock.tick (60) # max fps
 
-evo_main(True)
-evo_main(True)
+
+evo_main(False)
+
