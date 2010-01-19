@@ -1691,19 +1691,22 @@ def evo_main(draw_graphics=False):
 			clock.tick (60) # max fps
 	# TODO: dodaj dlugosc zycia
 	return thisGame.score
-
+count = -1
+dirs = []
 def ConsultPacmanBrain():
 	#
 	# remember to use thisLevel.CheckIfHitWall; look few lines up
 	#
-	
+	global count
+	global dirs
 	if thisGame.mode == 1:
-		if (player.velX, player.velY) == (0,0) or thisLevel.CheckIfHitWall((player.x + player.velX, player.y + player.velY), (player.nearestRow, player.nearestCol)):
-			dirs = EvoPacmanBrain()
+		count += 1
+		# sprawdzaj odleglosci na planszy co 16 zapytan lub jesli stoisz przy scianie lub sie nie poruszasz
+		if count % 16 == 0: #or (player.velX, player.velY) == (0,0) or thisLevel.CheckIfHitWall((player.x + player.velX, player.y + player.velY), (player.nearestRow, player.nearestCol)):
+			dirs = DirsVoting()
+		# natomiast co zapytaie probuj wybrac najlepsza sciezke
 			for i in dirs:
 				dir = instruction.Direction[i]
-			# while True:
-				# dir = random.randint(0,3)
 				if dir == 0 and not thisLevel.CheckIfHitWall((player.x + player.speed, player.y), (player.nearestRow, player.nearestCol)):
 					player.velX = player.speed
 					player.velY = 0
@@ -1722,7 +1725,7 @@ def ConsultPacmanBrain():
 					break
 
 
-def EvoPacmanBrain():
+def DirsVoting():
 	wayToGo = {
 		"north" : 0,
 		"south" : 0,
@@ -1810,13 +1813,18 @@ def pacman_fitness_function(genotyp = None, n = 10, graphics = False):
 	# print brainCells
 	results = [evo_main(graphics) for x in range(n)]
 	# print results
-	# n = float(n)
+	n = float(n)
 	average = sum(results)/n # srednia
-	# deltas = [abs(x - average) for x in results]
-	# min, max = average / 2, 3 * average / 2
-	# results = [x for x in deltas if x > min and x < max]
-	print results
 	return average
+	deltas = [abs(x - average) for x in results]
+	min, max = average / 2, 3 * average / 2
+	results1 = [x for x in deltas if x > min and x < max]
+	if results1 == []:
+		print results, average
+		return average
+	average1 = sum(results1)/float(len(results1))
+	print results, average, results1, average1
+	return average1
 
 
 

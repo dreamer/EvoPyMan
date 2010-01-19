@@ -7,11 +7,11 @@ from instruction import *
 from pacman import pacman_fitness_function
 from sys import argv
 	
-organismLen = 80
-testsNum = 1
+organismLen = 80 # PARAM: liczba instrukcji w mozgu
+testsNum = 1 # PARAM: liczba powtorzen przy obliczaniu wartosci funkcji celu
 
 class MyGen(BaseGene):
-	mutProb = 0.01
+	mutProb = 0.01 # PARAM: prawdopodobienstwo zmutowania genu
 	def mutate(self):
 		self.value = self.randomValue()
 	def randomValue(self):
@@ -26,7 +26,7 @@ for i in range(organismLen):
 	
 class MySpecimen(Organism):
 	genome = genomeProto
-	mutateOneOnly = False
+	mutateOneOnly = False # PARAM: czy mutowac tylko jeden gen (True), czy sprawdzac dla kazdego mutProb (False)
 	crossoverRate = 0.5
 	def fitness(self):
 		brain = []
@@ -37,7 +37,6 @@ class MySpecimen(Organism):
 			if argv[1] == "1":
 				g = True
 		pff = pacman_fitness_function(genotyp = brain, n = testsNum, graphics = g)
-		print pff
 		return pff
 		# return sha1(self.hashIt()).hexdigest()
 	def mate(self, partner):
@@ -65,29 +64,28 @@ class MySpecimen(Organism):
 		return "{" + s + " }[ " + str(self.fitness()) + " ]"
 
 class MyPopulation(Population):
-	# cull to this many children after each generation
+	# PARAM: przycina populacje to tylu dzieci
 	childCull = 20
 	
-	# number of children to create after each generation (tak naprawde to liczba par dzieci)
+	# PARAM: generuje duza populacje dzieci (tak naprawde to liczba par dzieci)
 	childCount = 100
 	
-	# max number of best parents to mix amongst the kids for
-	# next generation
+	# PARAM: liczba przekazywanych najlepszych rodzicow do kolejnen populacji
 	incest = 2
 	
-	# parameters governing addition of random new organisms
-	numNewOrganisms = 0 # number of new orgs to add each generation (tak naprawde dodaje initPopulation organizmow, i to dodaje je przed krzyzowaniem, ostro przymula)
+	# PARAM: losuje nowe organizmy, nie uzywamy bo zamula
+	numNewOrganisms = 0 
 	
-	# set to initial population size
+	# PARAM: wielkosc poczatkowej populacji
 	initPopulation = 20
 	
 	# set to species of organism
 	species = MySpecimen
 	
-	# mutate this proportion of organisms
+	# PARAM: jesli mutateAfterMating == False to to oznacza ile jaki procent mutantow dodamy
 	mutants = 0.2
 	
-	# set this to true to mutate all progeny
+	# PARAM: mutujemy wszystkie dzieci (True), albo dodajemy nowe mutanty (False)
 	mutateAfterMating = True
 		
 pop = MyPopulation()
