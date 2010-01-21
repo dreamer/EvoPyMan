@@ -1589,8 +1589,10 @@ def main():
 		
 		clock.tick (60)
 
-
+movesCount = 0
 def evo_main(draw_graphics=False):
+	global movesCount
+	movesCount = 0
 	sound_on = draw_graphics
 	last_tick = pygame.time.get_ticks()
 
@@ -1691,20 +1693,19 @@ def evo_main(draw_graphics=False):
 			clock.tick (60) # max fps
 	# TODO: dodaj dlugosc zycia
 	return thisGame.score
-count = -1
 dirs = []
 def ConsultPacmanBrain():
 	#
 	# remember to use thisLevel.CheckIfHitWall; look few lines up
 	#
-	global count
+	global movesCount
 	global dirs
 	if thisGame.mode == 1:
-		count += 1
-		# sprawdzaj odleglosci na planszy co 16 zapytan lub jesli stoisz przy scianie lub sie nie poruszasz
-		if count % 16 == 0: #or (player.velX, player.velY) == (0,0) or thisLevel.CheckIfHitWall((player.x + player.velX, player.y + player.velY), (player.nearestRow, player.nearestCol)):
+		# badaj sytuacje na planszy oraz decyduj tylko gdy jest w srodku kradki
+		if player.x % 16 == 0 and player.y % 16 == 0: #or (player.velX, player.velY) == (0,0) or thisLevel.CheckIfHitWall((player.x + player.velX, player.y + player.velY), (player.nearestRow, player.nearestCol)):
+			movesCount += 1
+			#print player.x, player.y
 			dirs = DirsVoting()
-		# natomiast co zapytaie probuj wybrac najlepsza sciezke
 			for i in dirs:
 				dir = instruction.Direction[i]
 				if dir == 0 and not thisLevel.CheckIfHitWall((player.x + player.speed, player.y), (player.nearestRow, player.nearestCol)):
@@ -1810,11 +1811,13 @@ if __name__ == '__main__':
 def pacman_fitness_function(genotyp = None, n = 10, graphics = False):
 	global brainCells
 	brainCells = genotyp
-	# print brainCells
-	results = [evo_main(graphics) for x in range(n)]
-	# print results
+	# lista par (punkty, kroki)
+	results = [(evo_main(graphics), movesCount) for x in range(n)]
 	n = float(n)
-	average = sum(results)/n # srednia
+	# srednia z samych punktow
+	# average = sum([p for (p, m) in results])/n
+	average = sum([p+m for (p, m) in results])/n
+	print results, average
 	return average
 	deltas = [abs(x - average) for x in results]
 	min, max = average / 2, 3 * average / 2

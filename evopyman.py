@@ -7,16 +7,16 @@ from instruction import *
 from pacman import pacman_fitness_function
 from sys import argv
 	
-organismLen = 80 # PARAM: liczba instrukcji w mozgu
-testsNum = 1 # PARAM: liczba powtorzen przy obliczaniu wartosci funkcji celu
+organismLen = 10 # PARAM: liczba instrukcji w mozgu
+testsNum = 10 # PARAM: liczba powtorzen przy obliczaniu wartosci funkcji celu
 
 class MyGen(BaseGene):
 	mutProb = 0.01 # PARAM: prawdopodobienstwo zmutowania genu
 	def mutate(self):
 		self.value = self.randomValue()
 	def randomValue(self):
-		r = Instruction()
-		# r = 1
+		# r = Instruction()
+		r = randint(0,10)
 		# print r
 		return r
 		
@@ -32,12 +32,12 @@ class MySpecimen(Organism):
 		brain = []
 		for i in xrange(organismLen):
 			brain.append(self[str(i)])
-		g = False
-		if(len(argv) > 1):
-			if argv[1] == "1":
-				g = True
-		pff = pacman_fitness_function(genotyp = brain, n = testsNum, graphics = g)
-		return pff
+		# g = False
+		# if(len(argv) > 1):
+			# if argv[1] == "1":
+				# g = True
+		# pff = pacman_fitness_function(genotyp = brain, n = testsNum, graphics = g)
+		return sum(brain)
 		# return sha1(self.hashIt()).hexdigest()
 	def mate(self, partner):
 		child1 = MySpecimen()
@@ -62,19 +62,20 @@ class MySpecimen(Organism):
 		for i in xrange(organismLen):
 			s += " " + str(self[str(i)]) + "\n"
 		return "{" + s + " }[ " + str(self.fitness()) + " ]"
+		# return "BEST: " + str(self.fitness())
 
 class MyPopulation(Population):
 	# PARAM: przycina populacje to tylu dzieci
-	childCull = 20
+	childCull = 10
 	
-	# PARAM: generuje duza populacje dzieci (tak naprawde to liczba par dzieci)
-	childCount = 100
+	# PARAM: generuje duza populacje dzieci (tak naprawde jest to liczba par dzieci)
+	childCount = 20
 	
-	# PARAM: liczba przekazywanych najlepszych rodzicow do kolejnen populacji
-	incest = 2
+	# PARAM: liczba przekazywanych najlepszych rodzicow do kolejnen populacji (dodawane przed przycieciem do childCull)
+	incest = 10
 	
-	# PARAM: losuje nowe organizmy, nie uzywamy bo zamula
-	numNewOrganisms = 0 
+	# PARAM: losuje nowe organizmy, nie uzywamy, bo zamula
+	numNewOrganisms = 0
 	
 	# PARAM: wielkosc poczatkowej populacji
 	initPopulation = 20
@@ -85,7 +86,7 @@ class MyPopulation(Population):
 	# PARAM: jesli mutateAfterMating == False to to oznacza ile jaki procent mutantow dodamy
 	mutants = 0.2
 	
-	# PARAM: mutujemy wszystkie dzieci (True), albo dodajemy nowe mutanty (False)
+	# PARAM: mutujemy wszystkie dzieci po troszku (True) [patrz: mutProb], albo dodajemy nowe mutanty (False)
 	mutateAfterMating = True
 		
 pop = MyPopulation()
