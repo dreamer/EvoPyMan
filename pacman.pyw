@@ -1726,23 +1726,37 @@ def ConsultPacmanBrain():
 					break
 
 
+wayToGo = {
+	"north" : 0,
+	"south" : 0,
+	"east"  : 0,
+	"west"  : 0
+	}
 def DirsVoting():
-	wayToGo = {
-		"north" : 0,
-		"south" : 0,
-		"east"  : 0,
-		"west"  : 0
-		}
+	wayToGo["north"], wayToGo["south"], wayToGo["east"], wayToGo["west"] = 0, 0, 0, 0
 	dists = distance()
 	for b in brainCells:
 		if StateMatch(b, dists):
 			wayToGo[b.dirToGo] += 1
 	dirs = list(wayToGo)
-	dirs.sort(lambda x, y : wayToGo[y] - wayToGo[x])
+	# dirs.sort(lambda x, y : wayToGo[y] - wayToGo[x]) # w przypadku remisow jakis z gory narzucony priorytet
+	dirs.sort(compWays) # w przypadku remisow losuj
+	
+	# wypisywanie wynikow losowania
+	# summ = 0
 	# for i in dirs:
 		# print i, ":", wayToGo[i], " ", 
-	# print
+		# summ += wayToGo[i]
+	# print summ
+	
 	return dirs
+
+def compWays(x, y):
+	diff = wayToGo[y] - wayToGo[x]
+	if diff != 0:
+		return diff
+	else:
+		return random.choice([-1, 1])
 
 def StateMatch(cell, (bigDot, dot, ghost)):
 	# print cell.element, " : ", cell.range, (bigDot, dot, ghost), " | ", gstate, " : ", cell.mode

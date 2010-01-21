@@ -7,7 +7,7 @@ from instruction import *
 from pacman import pacman_fitness_function
 from sys import argv
 	
-organismLen = 10 # PARAM: liczba instrukcji w mozgu
+organismLen = 80 # PARAM: liczba instrukcji w mozgu
 testsNum = 10 # PARAM: liczba powtorzen przy obliczaniu wartosci funkcji celu
 
 class MyGen(BaseGene):
@@ -15,8 +15,8 @@ class MyGen(BaseGene):
 	def mutate(self):
 		self.value = self.randomValue()
 	def randomValue(self):
-		# r = Instruction()
-		r = randint(0,10)
+		r = Instruction()
+		# r = randint(0,10)
 		# print r
 		return r
 		
@@ -32,12 +32,12 @@ class MySpecimen(Organism):
 		brain = []
 		for i in xrange(organismLen):
 			brain.append(self[str(i)])
-		# g = False
-		# if(len(argv) > 1):
-			# if argv[1] == "1":
-				# g = True
-		# pff = pacman_fitness_function(genotyp = brain, n = testsNum, graphics = g)
-		return sum(brain)
+		g = False
+		if(len(argv) > 1):
+			if argv[1] == "1":
+				g = True
+		pff = pacman_fitness_function(genotyp = brain, n = testsNum, graphics = g)
+		return pff
 		# return sha1(self.hashIt()).hexdigest()
 	def mate(self, partner):
 		child1 = MySpecimen()
